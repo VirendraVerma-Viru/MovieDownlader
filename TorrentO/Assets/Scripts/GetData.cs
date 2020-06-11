@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 
 public class GetData : MonoBehaviour
 {
@@ -69,7 +70,7 @@ public class GetData : MonoBehaviour
     public Image ScreenshotImage3;
     public Image TrailerImage;
     public Text DescriptionText;
-    public Text MagnetLinkText;
+    public InputField MagnetLinkText;
 
     public GameObject FullScreenScreenShot;
 
@@ -79,6 +80,9 @@ public class GetData : MonoBehaviour
 
     void Start()
     {
+        ratingInput = "";
+        genreInput = "";
+        yearInput = "";
         saveload.Load();
         MainMenuButton.SetActive(true);
         BackButton.SetActive(false);
@@ -115,7 +119,7 @@ public class GetData : MonoBehaviour
     public GameObject SharePannel;
 
     public InputField FeedbackMessage;
-    public Text ShareInputField;
+    public InputField ShareInputField;
 
 
     public void OnDashBordButtonPressed()
@@ -174,7 +178,7 @@ public class GetData : MonoBehaviour
 
     #endregion
 
-    #region Create Account OnServer
+    #region Create Account OnServer and get notification
 
     [Header("Notification")]
     public GameObject NotificationPannel;
@@ -192,7 +196,7 @@ public class GetData : MonoBehaviour
         if (saveload.playerName == " ")
         {
             //create account
-            string createRandomAccount = Random.Range(10000, 1000000).ToString();
+            string createRandomAccount = UnityEngine.Random.Range(10000, 1000000).ToString();
             StartCoroutine(CreateAccountToServer(createRandomAccount));
         }
         else
@@ -216,7 +220,7 @@ public class GetData : MonoBehaviour
             
             if (GetDataValue(www.text, "Notification:") =="1")
             {
-                NotificationPannel.SetActive(true);
+                
                 if (GetDataValue(www.text, "Message:") != "" || GetDataValue(www.text, "Message:") != " ")
                 {
                     Message.text = GetDataValue(www.text, "Message:");
@@ -226,8 +230,8 @@ public class GetData : MonoBehaviour
                 {
                     
                     string s=GetDataValue(www.text, "ImageLink:");
-                    MessageImage = null;
-                    PlaceImageToObject(MessageImage, s,0);
+                    print(s);
+                    StartCoroutine( PlaceImageToObject(MessageImage, s,0));
                 }
 
                 if (GetDataValue(www.text, "DownloadButton:") != "" || GetDataValue(www.text, "DownloadButton:") != " ")
@@ -235,9 +239,17 @@ public class GetData : MonoBehaviour
                     SubmitButtonText.text=GetDataValue(www.text, "DownloadName:");
                     NotificationSubmitButton = GetDataValue(www.text, "DownloadLink:");
                 }
+
+                StartCoroutine(ActivateNotificationPannel());
             }
         }
 
+    }
+
+    IEnumerator ActivateNotificationPannel()
+    {
+        yield return new WaitForSeconds(3);
+        NotificationPannel.SetActive(true);
     }
 
     IEnumerator CreateAccountToServer(string randomname)
@@ -508,33 +520,89 @@ public class GetData : MonoBehaviour
 
     #region get Data for Search Page
     //-------------------------------------------get Data for Search Page------------------------------
+    public Dropdown ratingDropdown;
+    public Dropdown genreDropdown;
+    public Dropdown yearDropdown;
+
+    private string searchedItem;
+    private string ratingInput;
+    private string genreInput;
+    private string yearInput;
+
+    private string position="";
+    private string lengthTotal;
+
+    private GameObject MoveButton;
+    private bool isSearchedButtonPressed=false;
+
+    public void OnRatingChanged()
+    {
+        ratingInput = ratingDropdown.options[ratingDropdown.value].text;
+        
+    }
+
+    public void OnGenreChanged()
+    {
+        genreInput = genreDropdown.options[genreDropdown.value].text;
+        
+    }
+    public void OnYearChanged()
+    {
+        yearInput = yearDropdown.options[yearDropdown.value].text;
+        if (yearInput.Contains("Before 2000"))
+        {
+            yearInput = "19";
+        }
+    }
+
 
     public void GetSearchDataa()
     {
-        
-        OnBackButtonPressed();
-        GameObject[] go=GameObject.FindGameObjectsWithTag("Box");
-        foreach (GameObject g in go)
+        if (isSearchedButtonPressed == false)
         {
-            Destroy(g);
+            WaitAndCloseResultText("Searching");
+            position = "";
+            isSearchedButtonPressed = true;
+            OnBackButtonPressed();
+            GameObject[] go = GameObject.FindGameObjectsWithTag("Box");
+            foreach (GameObject g in go)
+            {
+                Destroy(g);
+            }
+            Destroy(MoreButtonPrivate);
+            Destroy(ReloadButtonPrivate);
+            string str = "";
+            str = searchInputField.text;
+            searchedItem = str;
+            if (str != null || str != "" || str != " ")
+            {
+                StartCoroutine(SearchDataHome());
+            }
         }
-        Destroy(MoreButtonPrivate);
-        Destroy(ReloadButtonPrivate);
-        string str = "";
-         str = searchInputField.text;
-         if (str != null || str != "" || str != " ")
-         {
-             StartCoroutine(SearchDataHome(str));
-         }
     }
 
-    IEnumerator SearchDataHome(string str)
+    IEnumerator SearchDataHome()
     {
+        if (ratingInput == "Rating")
+            ratingInput = "";
+        if (genreInput == "Genre")
+            genreInput = "";
+        if (yearInput == "Year")
+            yearInput = "";
+        ratingInput = ratingInput.Replace("+", "");
         WWWForm form1 = new WWWForm();
-        form1.AddField("thing", str);
+        print(ratingInput);
+        print(genreInput);
+        form1.AddField("pos", position);
+        form1.AddField("id", saveload.accountID);
+        form1.AddField("rating",ratingInput);
+        form1.AddField("genre", genreInput);
+        form1.AddField("year", yearInput);
+        form1.AddField("thing", searchedItem);
         WWW www = new WWW(getMovieSearchDataHome, form1);
         yield return www;
-
+        isSearchedButtonPressed = false;
+        print(www.text);
         
             if (www.text.Contains("ID"))
             {
@@ -557,6 +625,9 @@ public class GetData : MonoBehaviour
 
                 for (int i = 0; i < items.Length - 1; i++)
                 {
+                    print(i);
+                    position = GetDataValue(items[i], "Position:");
+                    lengthTotal = GetDataValue(items[i], "Length:");
                     movieID[i] = GetDataValue(items[i], "ID:");
                     movieName[i] = GetDataValue(items[i], "Name:");
                     movieRating[i] = GetDataValue(items[i], "Rating:");
@@ -581,7 +652,18 @@ public class GetData : MonoBehaviour
                     int sa = i;
                     go.transform.GetComponent<Button>().onClick.AddListener(() => OnContentButtonPressed(sa));
                     StartCoroutine(PlaceImageToObject(go.transform.Find("ProfilePhoto").GetComponent<Image>(), movieImage[i], 0));
-
+                    
+                }
+                print("Length" + position);
+                print(lengthTotal);
+                if(Convert.ToInt32( position) < Convert.ToInt32(lengthTotal))
+                {
+                    GameObject g = Instantiate(MoreButton);
+                    g.transform.SetParent(PlaceContent.transform);
+                    g.transform.localScale = Vector3.one;
+                    MoveButton = g;
+                    g.transform.Find("MoreButton").GetComponent<Button>().onClick.AddListener(() => SearchAgainafterclickonMoreButton());
+                    
                 }
             }else
             {
@@ -596,6 +678,12 @@ public class GetData : MonoBehaviour
             }
             
         
+    }
+
+    void SearchAgainafterclickonMoreButton()
+    {
+        Destroy(MoveButton);
+        StartCoroutine(SearchDataHome());
     }
 
     #endregion
@@ -643,7 +731,7 @@ public class GetData : MonoBehaviour
     public void OnMagnetButtonPressed()
     {
         Application.OpenURL(linkMagnet);
-        ShowAds(10);
+        
     }
 
     public void OnUTorrentButtonPressed()

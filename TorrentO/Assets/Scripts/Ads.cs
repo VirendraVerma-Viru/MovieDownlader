@@ -11,8 +11,11 @@ public class Ads : MonoBehaviour
 
     void Start()
     {
-        Advertisement.Initialize(gameId, testMode);
-        StartCoroutine(ShowBannerWhenReady());
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            Advertisement.Initialize(gameId, testMode);
+            StartCoroutine(ShowBannerWhenReady());
+        }
     }
 
     IEnumerator ShowBannerWhenReady()
@@ -29,10 +32,13 @@ public class Ads : MonoBehaviour
 
     public void ShowInter()
     {
-        // Initialize the Ads service:
-        Advertisement.Initialize(gameId, testMode);
-        // Show an ad:
-        Advertisement.Show();
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            // Initialize the Ads service:
+            Advertisement.Initialize(gameId, testMode);
+            // Show an ad:
+            Advertisement.Show();
+        }
     }
 }
 
