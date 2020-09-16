@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5223397213722832097}
   - component: {fileID: 3797809425940007470}
   m_Layer: 5
-  m_Name: MoreButton
+  m_Name: ReloadButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

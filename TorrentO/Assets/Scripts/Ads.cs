@@ -5,9 +5,9 @@ using UnityEngine.Advertisements;
 
 public class Ads : MonoBehaviour
 {
-    public string gameId = "3640873";
-    public string placementId = "9452";
-    public bool testMode = true;
+    string gameId = "3640873";
+    string placementId = "9452";
+    public bool testMode = false;
 
     void Start()
     {
@@ -16,17 +16,19 @@ public class Ads : MonoBehaviour
             Advertisement.Initialize(gameId, testMode);
             StartCoroutine(ShowBannerWhenReady());
         }
+        
     }
 
     IEnumerator ShowBannerWhenReady()
     {
         while (!Advertisement.IsReady(placementId))
         {
+            
             yield return new WaitForSeconds(0.5f);
         }
-        //Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
+        Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
         Advertisement.Banner.Show(placementId);
-        print("Loaded");
+        
         
     }
 
@@ -34,24 +36,9 @@ public class Ads : MonoBehaviour
     {
         if (Application.platform == RuntimePlatform.Android)
         {
-            // Initialize the Ads service:
-            Advertisement.Initialize(gameId, testMode);
-            // Show an ad:
             Advertisement.Show();
+            Advertisement.Initialize(gameId, testMode);
         }
     }
 }
 
-/*
-
-string gameId = "1234567";
-    bool testMode = true;
-
-    void Start () {
-        // Initialize the Ads service:
-        Advertisement.Initialize (gameId, testMode);
-        // Show an ad:
-        Advertisement.Show ();
-    }
-
-*/

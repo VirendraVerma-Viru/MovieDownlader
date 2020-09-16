@@ -12,12 +12,16 @@ using System.Runtime.Serialization.Formatters.Binary;
 public class saveload : MonoBehaviour
 {
 
-    public static string appVersion = "0.1";
+    public static string appVersion = "0.2";
 
     public static string accountID = " ";
     public static string playerName = " ";
-
-
+    public static int isGamePannelOn = 0;
+    public static int adsDelayTime = 100;
+    public static bool dubbedMovies = false;
+    public static int usageTime = 0;
+    public static bool isnewversionClose = false;
+    public static bool isFirstTime = false;
     public static string current_filename = "info.dat";
 
     public static void Save()
@@ -29,8 +33,13 @@ public class saveload : MonoBehaviour
 
         data.AccountID = accountID;
         data.PlayerName = playerName;
-
-
+        data.DubbedMovies = dubbedMovies;
+        data.IsGamePannelOn = isGamePannelOn;
+        data.UsageTime = usageTime;
+        data.IsNewVersionClose = isnewversionClose;
+        data.IsFirstTime = isFirstTime;
+        data.AdsDelayTime = adsDelayTime;
+        
         bf.Serialize(file, data);
         file.Close();
     }
@@ -46,10 +55,16 @@ public class saveload : MonoBehaviour
 
             accountID = data.AccountID;
             playerName = data.PlayerName;
+            dubbedMovies = data.DubbedMovies;
+            isGamePannelOn = data.IsGamePannelOn;
+            usageTime = data.UsageTime;
+            isnewversionClose = data.IsNewVersionClose;
+            isFirstTime = data.IsFirstTime;
+            adsDelayTime = data.AdsDelayTime;
 
-
+            //accountID = "8";//---------------------------------remove this
             file.Close();
-
+            appVersion = "0.2";
         }
         else
         {
@@ -101,5 +116,10 @@ class Notebook_Data
 {
     public string AccountID;
     public string PlayerName;
-
+    public bool DubbedMovies;
+    public int IsGamePannelOn;
+    public int UsageTime;
+    public bool IsNewVersionClose;
+    public bool IsFirstTime;
+    public int AdsDelayTime;
 }
